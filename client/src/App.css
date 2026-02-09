@@ -1,0 +1,45 @@
+:root {
+  /* ==================================  ===== */
+  /* =================================== COLORS ===== */
+  /* ==================================  ===== */
+  /* ===== DARK THEME COLORS ===== */
+  --d-background-color: linear-gradient(to bottom, #010510 55%, #010C2A 100%);
+  --d-primary-color: #010c2a;
+  --d-text-color: #f5F0E9;
+  /* ===== LIGHT THEME COLORS ===== */
+  --l-background-color: linear-gradient(to bottom, #D9CBC2 65%, #F5F0E9 100%);
+  --l-primary-color: #F5F0E9;
+  --l-text-color: #010510;
+  /* ===== COLORS IN COMMON ===== */
+  --secondary-color: #e0c58f;
+  --accent-color: #D9CBC2;
+  --bonus-color: #3E160C;
+
+
+  /* ==================================  ===== */
+  /* =================================== TYPO ===== */
+  /* ==================================  ===== */
+  --font-primary: 'Playfair Display', serif;
+  --font-secondary: 'Inter', sans-serif;
+}
+
+.background-dark{
+  margin: 0;
+  padding: 0;
+  background: var(--d-background-color);
+}
+.background-light{
+  margin: 0;
+  padding: 0;
+  background: var(--l-background-color);
+}
+
+h1,h2,h3,h4,h5,h6{
+  font-family: var(--font-primary);
+}
+
+p{
+  font-family: var(--font-secondary);
+}
+
+/* SI VOUS REALISEZ SUR VOS COMPOSANTS UN STYLE REUTILISABLE (BOUTON OU AUTRE), AJOUTEZ LE ICI, MERCI <3 */
