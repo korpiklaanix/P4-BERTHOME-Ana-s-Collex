@@ -1,12 +1,12 @@
 import { Link, NavLink } from "react-router";
 import "./NavBar.css";
-
+import LogoCollex from "../../assets/images/LogoCollex.png";
 function NavBar() {
   return (
     <nav className="navbar">
       {/* Logo */}
       <Link to="/" className="navbar__logo">
-        Collex
+        <img src={LogoCollex} alt="Logo Collex" />
       </Link>
 
       {/* Navigation */}

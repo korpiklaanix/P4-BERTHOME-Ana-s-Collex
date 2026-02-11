@@ -1,0 +1,54 @@
+/* ========================
+   FOOTER CONTAINER
+   ======================== */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+
+  background: #dad4de;
+  padding: 20px 32px;
+  margin-top: 40px;
+}
+
+/* ========================
+   LOGO
+   ======================== */
+
+.footer__logo img {
+  height: 50px;
+  width: auto;
+  margin-left: 30px;
+}
+
+/* ========================
+   LINKS
+   ======================== */
+
+.footer__links {
+  display: flex;
+  gap: 40px;
+}
+
+.footer__link {
+  color: #545455;
+  font-size: 1.1rem;
+  font-weight: bold;
+  transition: color 0.2s ease;
+}
+
+.footer__link:hover {
+  color: rgb(49, 48, 48);
+}
+
+/* ========================
+   COPYRIGHT
+   ======================== */
+
+.footer__copyright {
+  color: #545455;
+  font-size: 0.95rem;
+  margin-right: 30px;
+}

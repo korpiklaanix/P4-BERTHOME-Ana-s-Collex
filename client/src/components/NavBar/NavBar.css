@@ -6,11 +6,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  padding: 14px 32px;
-  background: #111;
-  border-bottom: 1px solid #222;
-
+  background: #dad4de;
+  padding: 20px 32px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -21,11 +19,14 @@
    ======================== */
 
 .navbar__logo {
-  font-size: 22px;
-  font-weight: bold;
   text-decoration: none;
-  color: white;
-  letter-spacing: 1px;
+}
+.navbar__logo img {
+  height: 70px;
+  width: auto;
+  margin-top: 10px;
+  margin-right: 8px;
+  margin-left: 30px;
 }
 
 /* ========================
@@ -34,23 +35,25 @@
 
 .navbar__links {
   display: flex;
-  gap: 28px;
+  gap: 50px;
+  margin-right: 50px;
 }
 
 .navbar__link {
   text-decoration: none;
-  color: #bbb;
-  font-size: 15px;
+  color: #545455;
+  font-size: 1.5rem;
   transition: color 0.2s ease;
+  font-weight: bold;
 }
 
 .navbar__link:hover {
-  color: white;
+  color: rgb(49, 48, 48);
 }
 
 /* Active route highlight */
 .navbar__link.active {
-  color: white;
-  border-bottom: 2px solid white;
+  color: #545455;
+  border-bottom: 2px solid #545455;
   padding-bottom: 2px;
 }
