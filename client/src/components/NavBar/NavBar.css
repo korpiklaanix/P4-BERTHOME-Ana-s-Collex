@@ -1,0 +1,56 @@
+/* ========================
+   NAVBAR CONTAINER
+   ======================== */
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 14px 32px;
+  background: #111;
+  border-bottom: 1px solid #222;
+
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* ========================
+   LOGO
+   ======================== */
+
+.navbar__logo {
+  font-size: 22px;
+  font-weight: bold;
+  text-decoration: none;
+  color: white;
+  letter-spacing: 1px;
+}
+
+/* ========================
+   LINKS
+   ======================== */
+
+.navbar__links {
+  display: flex;
+  gap: 28px;
+}
+
+.navbar__link {
+  text-decoration: none;
+  color: #bbb;
+  font-size: 15px;
+  transition: color 0.2s ease;
+}
+
+.navbar__link:hover {
+  color: white;
+}
+
+/* Active route highlight */
+.navbar__link.active {
+  color: white;
+  border-bottom: 2px solid white;
+  padding-bottom: 2px;
+}
