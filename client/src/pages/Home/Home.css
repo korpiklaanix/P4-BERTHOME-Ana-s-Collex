@@ -1,0 +1,64 @@
+/* ========================
+   HOME PAGE
+   ======================== */
+
+.home {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 20px;
+}
+
+/* ========================
+   CONTENT
+   ======================== */
+
+.home__content {
+  max-width: 700px;
+}
+
+/* ========================
+   TITLE
+   ======================== */
+
+.home__title {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* ========================
+   SUBTITLE
+   ======================== */
+
+.home__subtitle {
+  font-size: 1.4rem;
+  color: #545455;
+  line-height: 1.5;
+  margin-bottom: 40px;
+}
+
+/* ========================
+   BUTTON
+   ======================== */
+
+.home__button {
+  display: inline-block;
+  padding: 14px 28px;
+  font-size: 1.2rem;
+  font-weight: bold;
+
+  background: #545455;
+  color: white;
+  text-decoration: none;
+
+  border-radius: 8px;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.home__button:hover {
+  background: #3d3d3e;
+  transform: translateY(-2px);
+}
