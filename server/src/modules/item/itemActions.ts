@@ -34,11 +34,6 @@ const listPhotos: RequestHandler = async (req, res, next) => {
   }
 };
 
-/**
- * POST /api/items/:id/photo (upload.single("photo"))
- * -> Ajoute 1 photo dans item_photos (max 5)
- * -> Si pas de primary, la 1ère devient primary + sync cover_photo_url
- */
 const uploadPhoto: RequestHandler = async (req, res, next) => {
   try {
     const itemId = toId(req.params.id);

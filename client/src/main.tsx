@@ -25,10 +25,10 @@ import Home from "./pages/Home/Home";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />, // layout global (NavBar + Footer)
+    element: <App />,
     children: [
       {
-        index: true, // équivalent de "/"
+        index: true,
         element: <Home />,
       },
       {

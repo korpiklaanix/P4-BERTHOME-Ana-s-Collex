@@ -1,5 +1,5 @@
 /* =======================================================
-   ITEM DETAIL — MODERN COMPACT (with <dialog>)
+   ITEM DETAIL 
    ======================================================= */
 
 .itemdetail,
@@ -150,7 +150,7 @@
 
 .itemdetail__media img {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  /* aspect-ratio: 4 / 3; */
   object-fit: cover;
   display: block;
 
@@ -200,7 +200,6 @@
   backdrop-filter: blur(8px);
 }
 
-/* Thumbs */
 .itemdetail__thumbs {
   /* display: grid; */
   /* grid-template-columns: 1fr 1fr 1fr 1fr; */
@@ -265,7 +264,7 @@
   font-weight: 900;
   color: #545455;
 
-  pointer-events: none; /* évite toute “capture” de clic */
+  pointer-events: none;
 }
 
 /* ========================
@@ -306,7 +305,6 @@
   font-size: 1.02rem;
 }
 
-/* Inputs */
 .itemdetail__input,
 .itemdetail__textarea {
   width: 100%;
@@ -338,7 +336,6 @@
   background: rgba(255, 255, 255, 0.92);
 }
 
-/* Upload */
 .itemdetail__upload {
   padding: 14px;
   border-radius: 16px;
@@ -399,7 +396,6 @@
   font-size: 0.92rem;
 }
 
-/* Messages */
 .itemdetail__success,
 .itemdetail__error,
 .itemdetail__state {
@@ -432,12 +428,10 @@
    DIALOG (Photo actions)
    ======================================================= */
 
-/* Le backdrop natif du <dialog> */
 .itemdetail__modal::backdrop {
   background: rgba(0, 0, 0, 0.35);
 }
 
-/* Dialog box */
 .itemdetail__modal {
   border: 1px solid rgba(84, 84, 85, 0.14);
   border-radius: 18px;
@@ -550,7 +544,6 @@
     min-width: 140px;
   }
 
-  /* Dialog en bottom sheet */
   .itemdetail__modal {
     top: auto;
     bottom: 14px;

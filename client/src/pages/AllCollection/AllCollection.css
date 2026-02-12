@@ -96,19 +96,6 @@
 }
 
 /* ========================
-   GLOBAL SAFE (anti débordement)
-   ======================== */
-/* .allcollections,
-.allcollections * {
-  box-sizing: border-box;
-}
-
-.allcollections__header,
-.allcollections__formActions {
-  min-width: 0;
-} */
-
-/* ========================
    RESPONSIVE
    ======================== */
 

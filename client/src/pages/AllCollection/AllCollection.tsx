@@ -18,7 +18,6 @@ function AllCollection() {
   const [categories, setCategories] = useState<CategoryDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // form state
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [name, setName] = useState("");
   const [categoryId, setCategoryId] = useState<number | "">("");

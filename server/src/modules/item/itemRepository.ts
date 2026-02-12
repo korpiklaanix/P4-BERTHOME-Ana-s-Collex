@@ -47,7 +47,7 @@ async function update(
   );
 }
 
-// UPDATE cover_photo_url (primary)
+// UPDATE cover_photo_url
 async function updateCoverPhoto(itemId: number, photoUrl: string | null) {
   await databaseClient.query<Result>(
     "UPDATE items SET cover_photo_url = ? WHERE id = ?",

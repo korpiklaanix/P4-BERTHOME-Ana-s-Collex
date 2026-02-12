@@ -1,17 +1,17 @@
 import type { RequestHandler } from "express";
 import { CollectionRepository } from "./CollectionRepository";
 
-// ⚠️ MVP : user simulé
+//  user simulé
 const FAKE_USER_ID = 1;
 
-// GET /api/collections
+// GET
 export const getCollections: RequestHandler = async (req, res) => {
   const collections = await CollectionRepository.findAllByUserId(FAKE_USER_ID);
 
   res.json(collections);
 };
 
-// POST /api/collections
+// POST
 
 export const createCollection: RequestHandler = async (req, res) => {
   try {
@@ -61,7 +61,7 @@ export const createCollection: RequestHandler = async (req, res) => {
   }
 };
 
-// DELETE /api/collections/:id
+// DELETE
 export const deleteCollection: RequestHandler = async (req, res) => {
   const collectionId = Number(req.params.id);
 
@@ -74,7 +74,7 @@ export const deleteCollection: RequestHandler = async (req, res) => {
 
   res.sendStatus(204);
 };
-// UPDATE /api/collections/:id
+// UPDATE
 
 export const updateCollection: RequestHandler = async (req, res) => {
   const id = Number(req.params.id);

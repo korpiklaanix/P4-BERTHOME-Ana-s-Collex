@@ -48,7 +48,6 @@ function DetailItemCollection() {
   const [message, setMessage] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Menu actions photo (clic sur thumbnail en edit)
   const [selectedPhoto, setSelectedPhoto] = useState<ItemPhotoDTO | null>(null);
   const [isPhotoMenuOpen, setIsPhotoMenuOpen] = useState(false);
 
@@ -404,7 +403,6 @@ function DetailItemCollection() {
           )}
         </div>
 
-        {/* RIGHT: content */}
         <div className="itemdetail__content">
           {message && <p className="itemdetail__success">{message}</p>}
           {errorMsg && <p className="itemdetail__error">{errorMsg}</p>}
@@ -482,10 +480,8 @@ function DetailItemCollection() {
         </div>
       </div>
 
-      {/* Photo actions menu (edit only) */}
       {isPhotoMenuOpen && selectedPhoto && (
         <>
-          {/* overlay */}
           <div
             className="itemdetail__modalOverlay"
             role="presentation"
@@ -500,7 +496,6 @@ function DetailItemCollection() {
             open
             aria-labelledby="photo-actions-title"
             onClick={(e) => {
-              // clic "en dehors" du contenu => on ferme
               const rect = (
                 e.currentTarget as HTMLDialogElement
               ).getBoundingClientRect();
