@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import "./DetailItemCollection.css";
 
@@ -11,85 +11,207 @@ type ItemDetailsDTO = {
   description: string | null;
 };
 
+type ItemPhotoDTO = {
+  id: number;
+  item_id: number;
+  url: string;
+  is_primary: 0 | 1;
+  created_at: string;
+};
+
+const MAX_PHOTOS = 5;
+const API_URL = import.meta.env.VITE_API_URL as string;
+
+const toImgSrc = (url: string) =>
+  url && !url.startsWith("http://") && !url.startsWith("https://")
+    ? `${API_URL}${url}`
+    : url;
+
 function DetailItemCollection() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [item, setItem] = useState<ItemDetailsDTO | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const itemId = Number(id);
 
+  const [item, setItem] = useState<ItemDetailsDTO | null>(null);
+  const [photos, setPhotos] = useState<ItemPhotoDTO[]>([]);
+  const [activePhotoUrl, setActivePhotoUrl] = useState<string>("");
+
+  const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+
   const [title, setTitle] = useState("");
-  const [coverPhotoUrl, setCoverPhotoUrl] = useState("");
   const [description, setDescription] = useState("");
+
+  const [isUploading, setIsUploading] = useState(false);
+
   const [message, setMessage] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  useEffect(() => {
-    if (!id) return;
+  const activeSrc = useMemo(() => {
+    const raw =
+      activePhotoUrl || item?.cover_photo_url || (photos[0]?.url ?? "");
+    return raw ? toImgSrc(raw) : "";
+  }, [activePhotoUrl, item?.cover_photo_url, photos]);
 
-    const controller = new AbortController();
+  const loadAll = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!Number.isFinite(itemId)) return;
 
-    const run = async () => {
       setIsLoading(true);
       setErrorMsg("");
       setMessage("");
 
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/items/${id}`,
-          {
-            signal: controller.signal,
-          },
-        );
+        const [itemRes, photosRes] = await Promise.all([
+          fetch(`${API_URL}/api/items/${itemId}`, { signal }),
+          fetch(`${API_URL}/api/items/${itemId}/photos`, { signal }),
+        ]);
 
-        if (!res.ok) throw new Error("not found");
+        if (!itemRes.ok) throw new Error("Item introuvable");
 
-        const data: ItemDetailsDTO = await res.json();
+        const itemData: ItemDetailsDTO = await itemRes.json();
+        const photosData = photosRes.ok ? await photosRes.json() : [];
+        const safePhotos: ItemPhotoDTO[] = Array.isArray(photosData)
+          ? photosData
+          : [];
 
-        setItem(data);
-        setTitle(data.title);
-        setCoverPhotoUrl(data.cover_photo_url ?? "");
-        setDescription(data.description ?? "");
-      } catch {
+        setItem(itemData);
+        setPhotos(safePhotos);
+
+        setTitle(itemData.title);
+        setDescription(itemData.description ?? "");
+
+        const primary =
+          safePhotos.find((p) => p.is_primary === 1) ?? safePhotos[0] ?? null;
+
+        setActivePhotoUrl(primary?.url ?? itemData.cover_photo_url ?? "");
+      } catch (e) {
+        // ✅ IMPORTANT : on ignore les aborts
+        if (e instanceof DOMException && e.name === "AbortError") return;
+
         setItem(null);
+        setPhotos([]);
+        setActivePhotoUrl("");
+        setErrorMsg(e instanceof Error ? e.message : "Erreur");
       } finally {
+        // ✅ si abort, parfois inutile de setState aussi (mais ok)
         setIsLoading(false);
       }
-    };
+    },
+    [itemId],
+  );
 
-    run();
+  useEffect(() => {
+    if (!Number.isFinite(itemId)) return;
+
+    const controller = new AbortController();
+    loadAll(controller.signal);
 
     return () => controller.abort();
-  }, [id]);
+  }, [itemId, loadAll]);
 
-  const refreshItem = async () => {
-    if (!id) return;
+  const handleUploadPhotos = async (files: FileList | null) => {
+    if (!Number.isFinite(itemId)) return;
+    if (!files || files.length === 0) return;
 
-    setIsLoading(true);
+    if (photos.length >= MAX_PHOTOS) {
+      setErrorMsg(`Limite atteinte : ${MAX_PHOTOS} photos max.`);
+      return;
+    }
+
+    const file = files[0];
+    if (!file) return;
+
+    setIsUploading(true);
     setErrorMsg("");
+    setMessage("");
+
+    try {
+      const formData = new FormData();
+      formData.append("photos", file);
+
+      const res = await fetch(`${API_URL}/api/items/${itemId}/photos`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(
+          err?.message ?? `Upload impossible (HTTP ${res.status})`,
+        );
+      }
+
+      setMessage("Photo uploadée ✅");
+      await loadAll();
+    } catch (e) {
+      setErrorMsg(e instanceof Error ? e.message : "Upload impossible");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleSetPrimary = async (photoId: number) => {
+    if (!Number.isFinite(itemId)) return;
+
+    setErrorMsg("");
+    setMessage("");
+    setIsUploading(true);
 
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/items/${id}`,
+        `${API_URL}/api/items/${itemId}/photos/${photoId}/primary`,
+        { method: "PATCH" },
       );
-      if (!res.ok) throw new Error("not found");
 
-      const data: ItemDetailsDTO = await res.json();
-      setItem(data);
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.message ?? "Impossible de mettre en principale");
+      }
 
-      setTitle(data.title);
-      setCoverPhotoUrl(data.cover_photo_url ?? "");
-      setDescription(data.description ?? "");
-    } catch {
-      setItem(null);
+      setMessage("Photo principale mise à jour ✅");
+      await loadAll();
+    } catch (e) {
+      setErrorMsg(e instanceof Error ? e.message : "Erreur");
     } finally {
-      setIsLoading(false);
+      setIsUploading(false);
+    }
+  };
+
+  const handleDeletePhoto = async (photoId: number) => {
+    if (!Number.isFinite(itemId)) return;
+
+    setErrorMsg("");
+    setMessage("");
+
+    const confirm = window.confirm("Supprimer cette photo ?");
+    if (!confirm) return;
+
+    setIsUploading(true);
+
+    try {
+      const res = await fetch(
+        `${API_URL}/api/items/${itemId}/photos/${photoId}`,
+        { method: "DELETE" },
+      );
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.message ?? "Impossible de supprimer la photo");
+      }
+
+      setMessage("Photo supprimée ✅");
+      await loadAll();
+    } catch (e) {
+      setErrorMsg(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleUpdate = async () => {
-    if (!id) return;
+    if (!Number.isFinite(itemId)) return;
 
     setErrorMsg("");
     setMessage("");
@@ -104,12 +226,11 @@ function DetailItemCollection() {
     );
     if (!confirm) return;
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/items/${id}`, {
+    const res = await fetch(`${API_URL}/api/items/${itemId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title: title.trim(),
-        cover_photo_url: coverPhotoUrl.trim() ? coverPhotoUrl.trim() : null,
         description: description.trim() ? description.trim() : null,
       }),
     });
@@ -122,11 +243,11 @@ function DetailItemCollection() {
 
     setIsEditing(false);
     setMessage("Item modifié ✅");
-    await refreshItem();
+    await loadAll();
   };
 
-  const handleDelete = async () => {
-    if (!id || !item) return;
+  const handleDeleteItem = async () => {
+    if (!item || !Number.isFinite(itemId)) return;
 
     setErrorMsg("");
     setMessage("");
@@ -134,7 +255,7 @@ function DetailItemCollection() {
     const confirm = window.confirm("Supprimer cet item ?");
     if (!confirm) return;
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/items/${id}`, {
+    const res = await fetch(`${API_URL}/api/items/${itemId}`, {
       method: "DELETE",
     });
 
@@ -144,6 +265,26 @@ function DetailItemCollection() {
     }
 
     navigate(`/collections/${item.collection_id}`);
+  };
+
+  const handleCancelEdit = () => {
+    if (!item) return;
+
+    setIsEditing(false);
+    setErrorMsg("");
+    setMessage("");
+
+    setTitle(item.title);
+    setDescription(item.description ?? "");
+
+    const primary = photos.find((p) => p.is_primary === 1) ?? photos[0] ?? null;
+    setActivePhotoUrl(primary?.url ?? item.cover_photo_url ?? "");
+  };
+
+  const isActiveThumb = (url: string) => {
+    const currentRaw =
+      activePhotoUrl || item?.cover_photo_url || (photos[0]?.url ?? "") || "";
+    return currentRaw === url;
   };
 
   if (isLoading) return <p className="itemdetail__state">Chargement...</p>;
@@ -175,6 +316,7 @@ function DetailItemCollection() {
                 type="button"
                 className="itemdetail__btn"
                 onClick={handleUpdate}
+                disabled={isUploading}
               >
                 Valider
               </button>
@@ -182,14 +324,8 @@ function DetailItemCollection() {
               <button
                 type="button"
                 className="itemdetail__btn itemdetail__btn--ghost"
-                onClick={() => {
-                  setIsEditing(false);
-                  setErrorMsg("");
-                  setMessage("");
-                  setTitle(item.title);
-                  setCoverPhotoUrl(item.cover_photo_url ?? "");
-                  setDescription(item.description ?? "");
-                }}
+                onClick={handleCancelEdit}
+                disabled={isUploading}
               >
                 Annuler
               </button>
@@ -199,7 +335,8 @@ function DetailItemCollection() {
           <button
             type="button"
             className="itemdetail__btn itemdetail__btn--danger"
-            onClick={handleDelete}
+            onClick={handleDeleteItem}
+            disabled={isUploading}
           >
             Supprimer
           </button>
@@ -208,15 +345,36 @@ function DetailItemCollection() {
 
       <div className="itemdetail__card">
         <div className="itemdetail__media">
-          {coverPhotoUrl || item.cover_photo_url ? (
-            <img
-              src={coverPhotoUrl || item.cover_photo_url || ""}
-              alt={title || item.title}
-            />
+          {activeSrc ? (
+            <img src={activeSrc} alt={title || item.title} />
           ) : (
             <div className="itemdetail__placeholder">
               <span>Collex</span>
             </div>
+          )}
+
+          {photos.length > 0 && (
+            <>
+              <div className="itemdetail__thumbs">
+                {photos.slice(0, MAX_PHOTOS).map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    className={`itemdetail__thumb ${
+                      isActiveThumb(p.url) ? "is-active" : ""
+                    }`}
+                    onClick={() => setActivePhotoUrl(p.url)}
+                    aria-label="Voir la photo"
+                  >
+                    <img src={toImgSrc(p.url)} alt="miniature" />
+                  </button>
+                ))}
+              </div>
+
+              <p className="itemdetail__thumbHint">
+                {photos.length}/{MAX_PHOTOS} photos
+              </p>
+            </>
           )}
         </div>
 
@@ -224,12 +382,88 @@ function DetailItemCollection() {
           {!isEditing ? (
             <h1 className="itemdetail__title">{item.title}</h1>
           ) : (
-            <input
-              className="itemdetail__input"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Titre"
-            />
+            <>
+              <input
+                className="itemdetail__input"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Titre"
+              />
+
+              <div className="itemdetail__upload">
+                <label
+                  className="itemdetail__uploadLabel"
+                  htmlFor="photoUpload"
+                >
+                  Ajouter une photo ({photos.length}/{MAX_PHOTOS})
+                </label>
+
+                <input
+                  id="photoUpload"
+                  type="file"
+                  accept="image/*"
+                  disabled={isUploading || photos.length >= MAX_PHOTOS}
+                  onChange={(e) => {
+                    handleUploadPhotos(e.target.files);
+                    e.currentTarget.value = "";
+                  }}
+                />
+
+                {photos.length >= MAX_PHOTOS && (
+                  <p className="itemdetail__state">
+                    Limite atteinte : {MAX_PHOTOS} photos max.
+                  </p>
+                )}
+
+                {isUploading && (
+                  <p className="itemdetail__state">Traitement en cours...</p>
+                )}
+              </div>
+
+              {photos.length > 0 && (
+                <div className="itemdetail__photoActions">
+                  <p className="itemdetail__state">Gestion des photos :</p>
+
+                  <div className="itemdetail__photoActionsGrid">
+                    {photos.slice(0, MAX_PHOTOS).map((p) => (
+                      <div className="itemdetail__photoRow" key={p.id}>
+                        <button
+                          type="button"
+                          className={`itemdetail__mini ${
+                            isActiveThumb(p.url) ? "is-active" : ""
+                          }`}
+                          onClick={() => setActivePhotoUrl(p.url)}
+                        >
+                          <img src={toImgSrc(p.url)} alt="mini" />
+                        </button>
+
+                        <div className="itemdetail__photoRowBtns">
+                          <button
+                            type="button"
+                            className="itemdetail__btn"
+                            onClick={() => handleSetPrimary(p.id)}
+                            disabled={isUploading || p.is_primary === 1}
+                          >
+                            {p.is_primary === 1
+                              ? "Principale"
+                              : "Mettre principale"}
+                          </button>
+
+                          <button
+                            type="button"
+                            className="itemdetail__btn itemdetail__btn--danger"
+                            onClick={() => handleDeletePhoto(p.id)}
+                            disabled={isUploading}
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {!isEditing ? (
@@ -245,15 +479,6 @@ function DetailItemCollection() {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Description"
               rows={5}
-            />
-          )}
-
-          {isEditing && (
-            <input
-              className="itemdetail__input"
-              value={coverPhotoUrl}
-              onChange={(e) => setCoverPhotoUrl(e.target.value)}
-              placeholder="URL de la photo (optionnel)"
             />
           )}
 

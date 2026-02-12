@@ -89,17 +89,16 @@ export const ItemCollRepository = {
     itemId: number,
     userId: number,
     title: string,
-    coverPhotoUrl: string | null,
     description: string | null,
   ): Promise<ResultSetHeader> {
     const [result] = await databaseClient.query(
       `
-      UPDATE items i
-      JOIN collections c ON c.id = i.collection_id
-      SET i.title = ?, i.cover_photo_url = ?, i.description = ?
-      WHERE i.id = ? AND c.user_id = ?
-      `,
-      [title, coverPhotoUrl, description, itemId, userId],
+    UPDATE items i
+    JOIN collections c ON c.id = i.collection_id
+    SET i.title = ?, i.description = ?
+    WHERE i.id = ? AND c.user_id = ?
+    `,
+      [title, description, itemId, userId],
     );
 
     return result as ResultSetHeader;
@@ -114,6 +113,24 @@ export const ItemCollRepository = {
       WHERE i.id = ? AND c.user_id = ?
       `,
       [itemId, userId],
+    );
+
+    return result as ResultSetHeader;
+  },
+
+  async updateCoverPhoto(
+    itemId: number,
+    userId: number,
+    coverPhotoUrl: string | null,
+  ): Promise<ResultSetHeader> {
+    const [result] = await databaseClient.query(
+      `
+    UPDATE items i
+    JOIN collections c ON c.id = i.collection_id
+    SET i.cover_photo_url = ?
+    WHERE i.id = ? AND c.user_id = ?
+    `,
+      [coverPhotoUrl, itemId, userId],
     );
 
     return result as ResultSetHeader;

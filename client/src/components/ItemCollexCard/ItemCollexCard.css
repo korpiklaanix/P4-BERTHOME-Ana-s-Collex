@@ -1,3 +1,7 @@
+/* =======================================================
+   ITEM COLLEX CARD
+   ======================================================= */
+
 .itemcollex {
   display: flex;
   flex-direction: column;
@@ -5,9 +9,9 @@
 
   border-radius: 14px;
   background: #f3f1f5;
-  text-decoration: none;
-
   border: 1px solid #e3dee8;
+
+  text-decoration: none;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07);
 
   transition: transform 0.18s ease, box-shadow 0.18s ease;
@@ -18,12 +22,16 @@
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
 }
 
-/* ===== media ===== */
+/* =======================================================
+   MEDIA (image zone)
+   ======================================================= */
+
 .itemcollex__media {
   position: relative;
   width: 100%;
   height: 170px;
   background: #e9e4ee;
+  overflow: hidden;
 }
 
 .itemcollex__img {
@@ -33,10 +41,85 @@
   display: block;
 }
 
-/* ===== placeholder ===== */
+/* =======================================================
+   SLIDER NAV (arrows)
+   ======================================================= */
+
+.itemcollex__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+
+  border: 1px solid color-mix(in srgb, var(--secondary-color) 25%, transparent);
+  background: color-mix(in srgb, var(--primary-color) 75%, transparent);
+  backdrop-filter: blur(8px);
+
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+
+  opacity: 0.85;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.itemcollex__nav:hover {
+  opacity: 1;
+}
+
+.itemcollex__nav:active {
+  transform: translateY(-50%) scale(0.98);
+}
+
+.itemcollex__nav--left {
+  left: 10px;
+}
+
+.itemcollex__nav--right {
+  right: 10px;
+}
+
+/* =======================================================
+   SLIDER DOTS
+   ======================================================= */
+
+.itemcollex__dots {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+
+.itemcollex__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.45);
+  opacity: 0.75;
+}
+
+.itemcollex__dot.is-active {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+/* =======================================================
+   PLACEHOLDER (no image)
+   ======================================================= */
+
 .itemcollex__placeholder {
   width: 100%;
   height: 100%;
+
   display: grid;
   place-items: center;
 
@@ -56,7 +139,10 @@
   text-transform: uppercase;
 }
 
-/* ===== content ===== */
+/* =======================================================
+   CONTENT
+   ======================================================= */
+
 .itemcollex__content {
   padding: 14px 16px 16px;
   display: flex;

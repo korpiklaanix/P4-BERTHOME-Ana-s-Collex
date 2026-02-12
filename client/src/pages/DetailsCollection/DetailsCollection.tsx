@@ -22,6 +22,8 @@ type ItemDTO = {
   acquired_date: string | null;
 };
 
+const API_URL = import.meta.env.VITE_API_URL as string;
+
 function DetailsCollection() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -40,8 +42,9 @@ function DetailsCollection() {
 
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [itemTitle, setItemTitle] = useState("");
-  const [itemPhotoUrl, setItemPhotoUrl] = useState("");
+  const [itemPhotoFile, setItemPhotoFile] = useState<File | null>(null);
   const [itemError, setItemError] = useState("");
+  const [isAddingItemLoading, setIsAddingItemLoading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -54,13 +57,11 @@ function DetailsCollection() {
 
       try {
         const [collectionRes, categoriesRes, itemsRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/api/collections/${id}`, {
+          fetch(`${API_URL}/api/collections/${id}`, {
             signal: controller.signal,
           }),
-          fetch(`${import.meta.env.VITE_API_URL}/api/categories`, {
-            signal: controller.signal,
-          }),
-          fetch(`${import.meta.env.VITE_API_URL}/api/collections/${id}/items`, {
+          fetch(`${API_URL}/api/categories`, { signal: controller.signal }),
+          fetch(`${API_URL}/api/collections/${id}/items`, {
             signal: controller.signal,
           }),
         ]);
@@ -100,11 +101,10 @@ function DetailsCollection() {
 
   const refreshItems = async () => {
     if (!id) return;
+
     setItemsLoading(true);
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/collections/${id}/items`,
-      );
+      const res = await fetch(`${API_URL}/api/collections/${id}/items`);
       const data: ItemDTO[] = await res.json();
       setItems(Array.isArray(data) ? data : []);
     } catch {
@@ -116,12 +116,16 @@ function DetailsCollection() {
 
   const refreshCollection = async () => {
     if (!id) return;
+
     setIsLoading(true);
     try {
       const [collectionRes, categoriesRes] = await Promise.all([
-        fetch(`${import.meta.env.VITE_API_URL}/api/collections/${id}`),
-        fetch(`${import.meta.env.VITE_API_URL}/api/categories`),
+        fetch(`${API_URL}/api/collections/${id}`),
+        fetch(`${API_URL}/api/categories`),
       ]);
+
+      if (!collectionRes.ok) throw new Error("Collection non trouvée");
+      if (!categoriesRes.ok) throw new Error("Catégories non trouvées");
 
       const collectionData: CollectionDetails = await collectionRes.json();
       const categoriesData: Category[] = await categoriesRes.json();
@@ -158,14 +162,11 @@ function DetailsCollection() {
       return;
     }
 
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/collections/${id}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), category_id: categoryId }),
-      },
-    );
+    const res = await fetch(`${API_URL}/api/collections/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name.trim(), category_id: categoryId }),
+    });
 
     if (!res.ok) {
       alert("Erreur lors de la modification");
@@ -183,10 +184,7 @@ function DetailsCollection() {
     const confirm = window.confirm("Supprimer cette collection ?");
     if (!confirm) return;
 
-    await fetch(`${import.meta.env.VITE_API_URL}/api/collections/${id}`, {
-      method: "DELETE",
-    });
-
+    await fetch(`${API_URL}/api/collections/${id}`, { method: "DELETE" });
     navigate("/collections");
   };
 
@@ -195,40 +193,76 @@ function DetailsCollection() {
     if (!id) return;
 
     setItemError("");
+    setIsAddingItemLoading(true);
 
-    if (!itemTitle.trim()) {
-      setItemError("Le nom de l’item est obligatoire.");
-      return;
-    }
+    try {
+      if (!itemTitle.trim()) {
+        setItemError("Le nom de l’item est obligatoire.");
+        return;
+      }
 
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/collections/${id}/items`,
-      {
+      const createRes = await fetch(`${API_URL}/api/collections/${id}/items`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: itemTitle.trim(),
-          cover_photo_url: itemPhotoUrl.trim() ? itemPhotoUrl.trim() : null,
+          cover_photo_url: null,
         }),
-      },
-    );
+      });
 
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => null);
-      setItemError(errorData?.message ?? "Impossible d’ajouter l’item.");
-      return;
+      if (!createRes.ok) {
+        const errorData = await createRes.json().catch(() => null);
+        setItemError(errorData?.message ?? "Impossible d’ajouter l’item.");
+        return;
+      }
+
+      const created = (await createRes.json()) as {
+        insertId?: number;
+        id?: number;
+      };
+      const newItemId = created.insertId ?? created.id;
+
+      if (!newItemId) {
+        setItemError("Item créé, mais impossible de récupérer son id.");
+        return;
+      }
+
+      if (itemPhotoFile) {
+        const formData = new FormData();
+        formData.append("photo", itemPhotoFile);
+
+        const uploadRes = await fetch(
+          `${API_URL}/api/items/${newItemId}/photo`,
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
+
+        if (!uploadRes.ok) {
+          const err = await uploadRes.json().catch(() => null);
+          setItemError(
+            err?.message ?? "Item créé, mais upload photo impossible.",
+          );
+        }
+      }
+
+      // Reset + refresh
+      setItemTitle("");
+      setItemPhotoFile(null);
+      setIsAddingItem(false);
+      await refreshItems();
+    } finally {
+      setIsAddingItemLoading(false);
     }
-
-    setItemTitle("");
-    setItemPhotoUrl("");
-    setIsAddingItem(false);
-
-    await refreshItems();
   };
 
   if (isLoading) return <p>Chargement...</p>;
   if (!collection) return <p>Introuvable</p>;
-
+  console.log(
+    "items cover_photo_url",
+    items.map((i) => ({ id: i.id, cover: i.cover_photo_url })),
+  );
   return (
     <section className="details">
       <header className="details__header">
@@ -286,9 +320,6 @@ function DetailsCollection() {
                 className="details__btn details__btn--ghost"
                 onClick={() => {
                   setIsEditing(false);
-
-                  if (!collection) return;
-
                   setName(collection.name);
                   const currentCategory = categories.find(
                     (c) => c.label === collection.category_label,
@@ -338,27 +369,33 @@ function DetailsCollection() {
                 placeholder="Nom de l’item"
                 onChange={(e) => setItemTitle(e.target.value)}
               />
+
               <input
                 className="details__input"
-                type="text"
-                value={itemPhotoUrl}
-                placeholder="URL de la photo (optionnel)"
-                onChange={(e) => setItemPhotoUrl(e.target.value)}
+                type="file"
+                accept="image/*"
+                onChange={(e) => setItemPhotoFile(e.target.files?.[0] ?? null)}
               />
 
               <div className="details__addActions">
-                <button className="details__btn" type="submit">
-                  Ajouter
+                <button
+                  className="details__btn"
+                  type="submit"
+                  disabled={isAddingItemLoading}
+                >
+                  {isAddingItemLoading ? "Ajout..." : "Ajouter"}
                 </button>
+
                 <button
                   className="details__btn details__btn--ghost"
                   type="button"
                   onClick={() => {
                     setIsAddingItem(false);
                     setItemTitle("");
-                    setItemPhotoUrl("");
+                    setItemPhotoFile(null);
                     setItemError("");
                   }}
+                  disabled={isAddingItemLoading}
                 >
                   Annuler
                 </button>
@@ -375,14 +412,14 @@ function DetailsCollection() {
           <p className="details__state">Aucun item pour le moment</p>
         ) : (
           <div className="details__itemsGrid">
-            {items.map((item) => (
+            {items.map((it) => (
               <ItemCollexCard
-                key={item.id}
-                id={item.id}
-                title={item.title}
-                coverPhotoUrl={item.cover_photo_url}
-                acquiredDate={item.acquired_date}
-                to={`/items/${item.id}`}
+                key={it.id}
+                id={it.id}
+                title={it.title}
+                coverPhotoUrl={it.cover_photo_url}
+                acquiredDate={it.acquired_date}
+                to={`/items/${it.id}`}
               />
             ))}
           </div>
