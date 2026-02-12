@@ -58,7 +58,7 @@ export const readItem: RequestHandler = async (req, res) => {
 
 export const updateItem: RequestHandler = async (req, res) => {
   const itemId = Number(req.params.id);
-  const { title, cover_photo_url, description } = req.body;
+  const { title, description } = req.body;
 
   if (Number.isNaN(itemId)) {
     res.status(400).json({ message: "invalid id" });
@@ -74,8 +74,9 @@ export const updateItem: RequestHandler = async (req, res) => {
     itemId,
     FAKE_USER_ID,
     title.trim(),
-    cover_photo_url ?? null,
-    description ?? null,
+    typeof description === "string" && description.trim()
+      ? description.trim()
+      : null,
   );
 
   if (result.affectedRows === 0) {

@@ -1,61 +1,72 @@
 import databaseClient from "../../../database/client";
-
 import type { Result, Rows } from "../../../database/client";
 
-type Item = {
+export type Item = {
   id: number;
+  collection_id: number;
   title: string;
-  user_id: number;
+  cover_photo_url: string | null;
+  acquired_date: string | null;
+  description: string | null;
 };
 
-class ItemRepository {
-  // The C of CRUD - Create operation
+// CREATE
+async function create(item: Pick<Item, "collection_id" | "title">) {
+  const [result] = await databaseClient.query<Result>(
+    "INSERT INTO items (collection_id, title) VALUES (?, ?)",
+    [item.collection_id, item.title],
+  );
 
-  async create(item: Omit<Item, "id">) {
-    // Execute the SQL INSERT query to add a new item to the "item" table
-    const [result] = await databaseClient.query<Result>(
-      "insert into item (title, user_id) values (?, ?)",
-      [item.title, item.user_id],
-    );
-
-    // Return the ID of the newly inserted item
-    return result.insertId;
-  }
-
-  // The Rs of CRUD - Read operations
-
-  async read(id: number) {
-    // Execute the SQL SELECT query to retrieve a specific item by its ID
-    const [rows] = await databaseClient.query<Rows>(
-      "select * from item where id = ?",
-      [id],
-    );
-
-    // Return the first row of the result, which represents the item
-    return rows[0] as Item;
-  }
-
-  async readAll() {
-    // Execute the SQL SELECT query to retrieve all items from the "item" table
-    const [rows] = await databaseClient.query<Rows>("select * from item");
-
-    // Return the array of items
-    return rows as Item[];
-  }
-
-  // The U of CRUD - Update operation
-  // TODO: Implement the update operation to modify an existing item
-
-  // async update(item: Item) {
-  //   ...
-  // }
-
-  // The D of CRUD - Delete operation
-  // TODO: Implement the delete operation to remove an item by its ID
-
-  // async delete(id: number) {
-  //   ...
-  // }
+  return result.insertId;
 }
 
-export default new ItemRepository();
+// READ ONE
+async function read(id: number) {
+  const [rows] = await databaseClient.query<Rows>(
+    "SELECT * FROM items WHERE id = ?",
+    [id],
+  );
+
+  return rows[0] as Item | undefined;
+}
+
+// READ ALL
+async function readAll() {
+  const [rows] = await databaseClient.query<Rows>("SELECT * FROM items");
+  return rows as Item[];
+}
+
+// UPDATE (sans cover_photo_url)
+async function update(
+  itemId: number,
+  payload: { title: string; description: string | null },
+) {
+  await databaseClient.query<Result>(
+    "UPDATE items SET title = ?, description = ? WHERE id = ?",
+    [payload.title, payload.description, itemId],
+  );
+}
+
+// UPDATE cover_photo_url (primary)
+async function updateCoverPhoto(itemId: number, photoUrl: string | null) {
+  await databaseClient.query<Result>(
+    "UPDATE items SET cover_photo_url = ? WHERE id = ?",
+    [photoUrl, itemId],
+  );
+}
+
+// DELETE
+async function deleteItem(itemId: number) {
+  await databaseClient.query<Result>("DELETE FROM items WHERE id = ?", [
+    itemId,
+  ]);
+}
+
+export default {
+  create,
+  read,
+  readAll,
+  update,
+  updateCoverPhoto,
+  delete: deleteItem,
+};

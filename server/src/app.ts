@@ -1,5 +1,7 @@
 // Load the express module to create a web application
 
+import fs from "node:fs";
+import path from "node:path";
 import express from "express";
 
 const app = express();
@@ -57,6 +59,8 @@ app.use(express.urlencoded({ extended: true }));
 // app.use(express.text());
 // app.use(express.raw());
 
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
 /* ************************************************************************* */
 
 // Import the API router
@@ -74,9 +78,6 @@ app.use(router);
 // What it's for:
 // - Serving client static files from the server, which is useful when building a single-page application with React.
 // - Redirecting unhandled requests (e.g., all requests not matching a defined API route) to the client's index.html. This allows the client to handle client-side routing.
-
-import fs from "node:fs";
-import path from "node:path";
 
 // Serve server resources
 
