@@ -1,0 +1,97 @@
+.details {
+  flex: 1;
+  padding: 60px 20px;
+  max-width: 900px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.details__header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.details__category {
+  color: #6a6a6a;
+  font-weight: bold;
+}
+
+.details__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.details__btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  background: #545455;
+  color: white;
+}
+
+.details__btn--danger {
+  background: #a01818;
+}
+
+.details__btn--ghost {
+  background: transparent;
+  color: #545455;
+  border: 1px solid #545455;
+}
+
+.details__input {
+  padding: 8px;
+  font-size: 1rem;
+}
+
+.details__items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.details__success {
+  color: green;
+  font-weight: bold;
+}
+
+.details__state {
+  color: #545455;
+}
+
+.details__itemsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.details__itemsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.details__addForm {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.details__addActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.details__error {
+  margin: 0;
+  color: #a01818;
+  font-weight: bold;
+}

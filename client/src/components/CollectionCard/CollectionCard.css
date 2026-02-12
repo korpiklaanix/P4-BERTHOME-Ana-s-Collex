@@ -1,0 +1,33 @@
+.collectioncard {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 140px;
+
+  padding: 20px;
+  border-radius: 12px;
+
+  background: #f3f1f5;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.collectioncard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.collectioncard__title {
+  font-size: 1.4rem;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.collectioncard__category {
+  font-size: 1rem;
+  color: #6a6a6a;
+}
