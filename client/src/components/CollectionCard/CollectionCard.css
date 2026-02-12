@@ -14,6 +14,9 @@
 
   text-decoration: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .collectioncard:hover {
@@ -24,10 +27,65 @@
 .collectioncard__title {
   font-size: 1.4rem;
   color: #333;
-  margin-bottom: 8px;
+  margin: 0 0 8px;
+
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .collectioncard__category {
   font-size: 1rem;
   color: #6a6a6a;
+  margin: 0;
+
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ========================
+   RESPONSIVE
+   ======================== */
+
+@media (max-width: 900px) {
+  .collectioncard {
+    min-height: 130px;
+    padding: 18px;
+  }
+
+  .collectioncard__title {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .collectioncard {
+    min-height: 120px;
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .collectioncard__title {
+    font-size: 1.15rem;
+  }
+
+  .collectioncard__category {
+    font-size: 0.95rem;
+  }
+
+  .collectioncard:hover {
+    transform: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  }
+}
+
+@media (max-width: 420px) {
+  .collectioncard__title {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+  }
 }

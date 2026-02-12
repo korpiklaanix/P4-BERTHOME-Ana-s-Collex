@@ -113,7 +113,6 @@ function AllCollection() {
       return;
     }
 
-    // reset + refresh list
     setName("");
     setCategoryId("");
     setIsFormOpen(false);

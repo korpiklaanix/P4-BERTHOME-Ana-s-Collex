@@ -229,10 +229,10 @@ function DetailsCollection() {
 
       if (itemPhotoFile) {
         const formData = new FormData();
-        formData.append("photo", itemPhotoFile);
+        formData.append("photos", itemPhotoFile);
 
         const uploadRes = await fetch(
-          `${API_URL}/api/items/${newItemId}/photo`,
+          `${API_URL}/api/items/${newItemId}/photos`,
           {
             method: "POST",
             body: formData,
@@ -244,6 +244,18 @@ function DetailsCollection() {
           setItemError(
             err?.message ?? "Item créé, mais upload photo impossible.",
           );
+        } else {
+          // Optionnel : si ton API renvoie l'id de la photo créée,
+          // tu peux directement la mettre en principale.
+          const uploaded = await uploadRes.json().catch(() => null);
+          const newPhotoId = uploaded?.id ?? uploaded?.insertId;
+
+          if (newPhotoId) {
+            await fetch(
+              `${API_URL}/api/items/${newItemId}/photos/${newPhotoId}/primary`,
+              { method: "PATCH" },
+            );
+          }
         }
       }
 
@@ -266,36 +278,44 @@ function DetailsCollection() {
   return (
     <section className="details">
       <header className="details__header">
-        {!isEditing ? (
-          <h1>{collection.name}</h1>
-        ) : (
-          <input
-            className="details__input"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        )}
-
-        {!isEditing ? (
-          <p className="details__category">{collection.category_label}</p>
-        ) : (
-          <select
-            className="details__input"
-            value={categoryId}
-            onChange={(e) => {
-              const v = e.target.value;
-              setCategoryId(v === "" ? "" : Number(v));
-            }}
+        <div className="details__headerLeft">
+          <button
+            type="button"
+            className="details__back"
+            onClick={() => navigate("/collections")}
           >
-            <option value="">Choisir catégorie</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.label}
-              </option>
-            ))}
-          </select>
-        )}
+            ← Toutes mes collections
+          </button>
+          {!isEditing ? (
+            <h1>{collection.name}</h1>
+          ) : (
+            <input
+              className="details__input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          )}
 
+          {!isEditing ? (
+            <p className="details__category">{collection.category_label}</p>
+          ) : (
+            <select
+              className="details__input"
+              value={categoryId}
+              onChange={(e) => {
+                const v = e.target.value;
+                setCategoryId(v === "" ? "" : Number(v));
+              }}
+            >
+              <option value="">Choisir catégorie</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
         <div className="details__actions">
           {!isEditing ? (
             <button
@@ -411,7 +431,13 @@ function DetailsCollection() {
         ) : items.length === 0 ? (
           <p className="details__state">Aucun item pour le moment</p>
         ) : (
-          <div className="details__itemsGrid">
+          <div
+            className={`details__itemsGrid ${
+              items.length >= 3
+                ? "details__itemsGrid--many"
+                : "details__itemsGrid--few"
+            }`}
+          >
             {items.map((it) => (
               <ItemCollexCard
                 key={it.id}
