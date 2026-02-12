@@ -24,7 +24,8 @@ CREATE TABLE users (
 ) ENGINE=InnoDB;
 
 CREATE INDEX idx_users_role ON users(role);
-
+INSERT INTO users (email, password_hash, display_name, role)
+VALUES ('demo@collex.fr', 'TEMP_HASH_TO_REPLACE', 'Demo', 'user');
 -- =========================================================
 -- CATEGORIES 
 -- =========================================================
@@ -36,6 +37,9 @@ CREATE TABLE categories (
   CONSTRAINT uq_categories_label UNIQUE (label)
 ) ENGINE=InnoDB;
 
+INSERT INTO categories (label) VALUES
+('Cartes'), ('Figurines'), ('Jeux vidéo'), ('Livres'), ('Montres'),
+('Plantes'), ('LEGO'), ('Minéraux'), ('Vinyles'), ('Autre');
 -- =========================================================
 -- COLLECTIONS 
 -- =========================================================
@@ -62,7 +66,14 @@ CREATE INDEX idx_collections_user ON collections(user_id);
 CREATE INDEX idx_collections_category ON collections(category_id);
 
 -- éviter deux collections du même nom pour un même user
-CREATE UNIQUE INDEX uq_collections_user_name ON collections(user_id, name);
+-- CREATE UNIQUE INDEX uq_collections_user_name ON collections(user_id, name);
+
+INSERT INTO collections (user_id, category_id, name, description, is_private)
+VALUES
+(1, (SELECT id FROM categories WHERE label='Montres'), 'Montres', 'Mes montres préférées', 1),
+(1, (SELECT id FROM categories WHERE label='LEGO'), 'LEGO Star Wars', 'Sets et minifigs Star Wars', 1),
+(1, (SELECT id FROM categories WHERE label='Plantes'), 'Mes plantes', 'Plantes d’intérieur et boutures', 1),
+(1, (SELECT id FROM categories WHERE label='Livres'), 'Livres Fantasy', 'Sagas, one-shots et BD', 1);
 
 -- =========================================================
 -- ITEMS 
@@ -71,7 +82,7 @@ CREATE TABLE items (
   id INT PRIMARY KEY AUTO_INCREMENT,
   collection_id INT NOT NULL,
   title VARCHAR(140) NOT NULL,
-  cover_photo_url VARCHAR(255) NULL,   -- photo principale de la card
+  cover_photo_url VARCHAR(255) NULL,   
   acquired_date DATE NULL,
   description TEXT NULL,
   notes TEXT NULL,
@@ -85,7 +96,16 @@ CREATE TABLE items (
 
 CREATE INDEX idx_items_collection ON items(collection_id);
 CREATE INDEX idx_items_title ON items(title);
+INSERT INTO items (collection_id, title, cover_photo_url, acquired_date, description, notes)
+VALUES
+((SELECT id FROM collections WHERE user_id=1 AND name='Montres'), 'Seiko 5', NULL, '2023-10-12', 'Automatique, quotidienne', 'À nettoyer'),
+((SELECT id FROM collections WHERE user_id=1 AND name='Montres'), 'Casio Vintage', NULL, NULL, 'Petite montre rétro', NULL),
 
+((SELECT id FROM collections WHERE user_id=1 AND name='LEGO Star Wars'), 'X-Wing', NULL, NULL, 'Mon set préféré', NULL),
+((SELECT id FROM collections WHERE user_id=1 AND name='LEGO Star Wars'), 'Millennium Falcon', NULL, NULL, 'À exposer', 'Manque une pièce à vérifier'),
+
+((SELECT id FROM collections WHERE user_id=1 AND name='Mes plantes'), 'Monstera', NULL, '2024-06-01', 'Elle pousse vite', 'Penser tuteur'),
+((SELECT id FROM collections WHERE user_id=1 AND name='Mes plantes'), 'Calathea', NULL, NULL, 'Un peu capricieuse', 'Humidité ++');
 -- =========================================================
 -- OPTIONAL: ITEM PHOTOS 
 -- =========================================================
@@ -103,9 +123,4 @@ CREATE TABLE item_photos (
 
 CREATE INDEX idx_item_photos_item ON item_photos(item_id);
 
--- =========================================================
--- SEED CATEGORIES
--- =========================================================
-INSERT INTO categories (label) VALUES
-('Cartes'), ('Figurines'), ('Jeux vidéo'), ('Livres'), ('Montres'),
-('Plantes'), ('LEGO'), ('Minéraux'), ('Vinyles'), ('Autre');
+
