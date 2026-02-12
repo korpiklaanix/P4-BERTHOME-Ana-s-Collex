@@ -46,14 +46,6 @@ router.get("/api/items/:id", readItem);
 router.put("/api/items/:id", updateItem);
 router.delete("/api/items/:id", deleteItem);
 
-/* ************************************************************************* */
-/* PHOTOS (1 photo ancienne route) */
-// router.post(
-//   "/api/items/:id/photo",
-//   upload.single("photo"),
-//   itemActions.uploadPhoto,
-// );
-
 /* PHOTOS (multi max 5) */
 router.get("/api/items/:id/photos", itemActions.listPhotos);
 

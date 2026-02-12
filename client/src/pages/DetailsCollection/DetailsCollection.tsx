@@ -245,8 +245,6 @@ function DetailsCollection() {
             err?.message ?? "Item créé, mais upload photo impossible.",
           );
         } else {
-          // Optionnel : si ton API renvoie l'id de la photo créée,
-          // tu peux directement la mettre en principale.
           const uploaded = await uploadRes.json().catch(() => null);
           const newPhotoId = uploaded?.id ?? uploaded?.insertId;
 
@@ -259,7 +257,6 @@ function DetailsCollection() {
         }
       }
 
-      // Reset + refresh
       setItemTitle("");
       setItemPhotoFile(null);
       setIsAddingItem(false);
