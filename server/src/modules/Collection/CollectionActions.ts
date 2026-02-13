@@ -17,9 +17,6 @@ export const createCollection: RequestHandler = async (req, res) => {
   try {
     const { name, category_id, description } = req.body;
 
-    // 👀 debug : tu verras ce que le front envoie
-    console.log("POST /api/collections body:", req.body);
-
     if (!name || typeof name !== "string" || !name.trim()) {
       res.status(400).json({ message: "name is required" });
       return;

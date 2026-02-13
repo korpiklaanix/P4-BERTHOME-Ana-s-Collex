@@ -47,13 +47,6 @@ function AllCollection() {
     const run = async () => {
       setIsLoading(true);
       try {
-        const base = import.meta.env.VITE_API_URL;
-        console.log("API URL =", base);
-
-        const urlCategories = `${base}/api/categories`;
-        const urlCollections = `${base}/api/collections`;
-        console.log("GET", urlCategories);
-        console.log("GET", urlCollections);
         const [collectionsRes, categoriesRes] = await Promise.all([
           fetch(`${import.meta.env.VITE_API_URL}/api/collections`, {
             signal: controller.signal,
@@ -63,18 +56,6 @@ function AllCollection() {
           }),
         ]);
 
-        console.log("API URL =", import.meta.env.VITE_API_URL);
-        console.log("categoriesRes status", categoriesRes.status);
-        console.log(
-          "categoriesRes content-type",
-          categoriesRes.headers.get("content-type"),
-        );
-
-        // ✅ debug sans consommer categoriesRes
-        const raw = await categoriesRes.clone().text();
-        console.log("categories raw:", raw.slice(0, 200));
-
-        // ✅ lis normalement ensuite
         const collectionsData: unknown = await collectionsRes.json();
         const categoriesData: unknown = await categoriesRes.json();
 
@@ -106,11 +87,6 @@ function AllCollection() {
       setErrorMsg("Choisis une catégorie.");
       return;
     }
-
-    console.log("CREATE payload:", {
-      name: name.trim(),
-      category_id: categoryId,
-    });
 
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/collections`, {
       method: "POST",

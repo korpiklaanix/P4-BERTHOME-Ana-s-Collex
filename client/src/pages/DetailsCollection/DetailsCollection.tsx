@@ -268,10 +268,7 @@ function DetailsCollection() {
 
   if (isLoading) return <p>Chargement...</p>;
   if (!collection) return <p>Introuvable</p>;
-  console.log(
-    "items cover_photo_url",
-    items.map((i) => ({ id: i.id, cover: i.cover_photo_url })),
-  );
+
   return (
     <section className="details">
       <button
