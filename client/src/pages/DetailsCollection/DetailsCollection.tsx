@@ -274,15 +274,22 @@ function DetailsCollection() {
   );
   return (
     <section className="details">
+      <button
+        type="button"
+        className="details__back"
+        onClick={() => navigate("/collections")}
+      >
+        ← Toutes mes collections
+      </button>
       <header className="details__header">
         <div className="details__headerLeft">
-          <button
+          {/* <button
             type="button"
             className="details__back"
             onClick={() => navigate("/collections")}
           >
             ← Toutes mes collections
-          </button>
+          </button> */}
           {!isEditing ? (
             <h1>{collection.name}</h1>
           ) : (

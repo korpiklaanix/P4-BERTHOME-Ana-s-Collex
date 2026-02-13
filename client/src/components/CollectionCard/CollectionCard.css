@@ -9,7 +9,8 @@
   padding: 20px;
   border-radius: 12px;
 
-  background: #dad4de;
+  background: #dad4de81;
+  /* backdrop-filter: blur(5px); */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 
   text-decoration: none;
