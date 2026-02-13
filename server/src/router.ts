@@ -1,7 +1,7 @@
 import express from "express";
 import { upload } from "./modules/upload/uploadCongig";
 
-import itemActions from "./modules/Item/itemActions";
+import itemActions from "./modules/item/itemActions";
 
 import {
   addItem,
